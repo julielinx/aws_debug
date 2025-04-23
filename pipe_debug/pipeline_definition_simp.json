@@ -1,0 +1,128 @@
+{
+    "Version": "2020-12-01",
+    "Metadata": {},
+    "Parameters": [],
+    "PipelineExperimentConfig": {
+        "ExperimentName": {
+            "Get": "Execution.PipelineName"
+        },
+        "TrialName": {
+            "Get": "Execution.PipelineExecutionId"
+        }
+    },
+    "Steps": [
+        {
+            "Name": "1-WEB_DATA",
+            "Type": "Processing",
+            "Arguments": {
+                "ProcessingResources": {
+                    "ClusterConfig": {
+                        "InstanceType": "ml.m5.large",
+                        "InstanceCount": 1,
+                        "VolumeSizeInGB": 30
+                    }
+                },
+                "AppSpecification": {
+                    "ImageUri": "683313688378.dkr.ecr.us-east-1.amazonaws.com/sagemaker-scikit-learn:1.2-1-cpu-py3",
+                    "ContainerArguments": [
+                        "--table",
+                        "WEB_DATA",
+                        "--input-path",
+                        "/opt/ml/processing/input",
+                        "--output_path",
+                        "/opt/ml/processing/output",
+                        "--db-type",
+                        "mysql",
+                        "--dbname",
+                        "machinelearning",
+                        "--folder-date",
+                        "2025-04-15",
+                        "--interval",
+                        1
+                    ],
+                    "ContainerEntrypoint": [
+                        "/bin/bash",
+                        "/opt/ml/processing/input/entrypoint/runproc.sh"
+                    ]
+                },
+                "RoleArn": "arn:aws:iam::888962879387:role/service-role/AmazonSageMaker-ExecutionRole-20220812T094291",
+                "ProcessingInputs": [
+                    {
+                        "InputName": "input-1",
+                        "AppManaged": false,
+                        "S3Input": {
+                            "S3Uri": {
+                                "Std:Join": {
+                                    "On": "/",
+                                    "Values": [
+                                        "s3://",
+                                        "fraudEvent_name1Day20250415debug",
+                                        "sql_queries",
+                                        "base_query.txt"
+                                    ]
+                                }
+                            },
+                            "LocalPath": "/opt/ml/processing/input",
+                            "S3DataType": "S3Prefix",
+                            "S3InputMode": "File",
+                            "S3DataDistributionType": "FullyReplicated",
+                            "S3CompressionType": "None"
+                        }
+                    },
+                    {
+                        "InputName": "code",
+                        "AppManaged": false,
+                        "S3Input": {
+                            "S3Uri": "s3://sagemaker-us-east-1-888962879387/DebugProd/code/b88bcd50813de795c4852e161640cd0eb52bd53429ab911edacea56ad7f9b46a/sourcedir.tar.gz",
+                            "LocalPath": "/opt/ml/processing/input/code/",
+                            "S3DataType": "S3Prefix",
+                            "S3InputMode": "File",
+                            "S3DataDistributionType": "FullyReplicated",
+                            "S3CompressionType": "None"
+                        }
+                    },
+                    {
+                        "InputName": "entrypoint",
+                        "AppManaged": false,
+                        "S3Input": {
+                            "S3Uri": "s3://sagemaker-us-east-1-888962879387/DebugProd/code/7064c6f3bf668dbd59829e69e684badc12291a73e86c751fc9c32a8d8cc74f10/runproc.sh",
+                            "LocalPath": "/opt/ml/processing/input/entrypoint",
+                            "S3DataType": "S3Prefix",
+                            "S3InputMode": "File",
+                            "S3DataDistributionType": "FullyReplicated",
+                            "S3CompressionType": "None"
+                        }
+                    }
+                ],
+                "ProcessingOutputConfig": {
+                    "Outputs": [
+                        {
+                            "OutputName": "features",
+                            "AppManaged": false,
+                            "S3Output": {
+                                "S3Uri": {
+                                    "Std:Join": {
+                                        "On": "/",
+                                        "Values": [
+                                            "s3://bucket_name_here",
+                                            "mobility_models",
+                                            "fraudEvent_name1Day20250415debug",
+                                            "data",
+                                            "features"
+                                        ]
+                                    }
+                                },
+                                "LocalPath": "/opt/ml/processing/output",
+                                "S3UploadMode": "EndOfJob"
+                            }
+                        }
+                    ]
+                }
+            },
+            "CacheConfig": {
+                "Enabled": true,
+                "ExpireAfter": "PT24H"
+            }
+        }
+    ]
+}
